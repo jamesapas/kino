@@ -118,6 +118,7 @@ export type DiscoverOptions = {
   sortBy?: string;
   minVoteCount?: number;
   releasedBefore?: string;
+  withGenres?: number | string;
   /**
    * Restricts the query to one release year.
    *
@@ -135,6 +136,7 @@ export function discoverMovies({
   sortBy = "popularity.desc",
   minVoteCount = 100,
   releasedBefore,
+  withGenres,
   primaryReleaseYear,
   language = "en-US",
 }: DiscoverOptions = {}): Promise<TmdbDiscoverResponse> {
@@ -143,6 +145,7 @@ export function discoverMovies({
     sort_by: sortBy,
     "vote_count.gte": minVoteCount,
     "primary_release_date.lte": releasedBefore,
+    with_genres: withGenres,
     primary_release_year: primaryReleaseYear,
     include_adult: false,
     include_video: false,
@@ -169,6 +172,16 @@ export function getTrendingMovies(
   language = "en-US",
 ): Promise<TmdbTrendingResponse> {
   return tmdbFetch<TmdbTrendingResponse>("/trending/movie/day", {
+    page,
+    language,
+  });
+}
+
+export function getTopRatedMovies(
+  page = 1,
+  language = "en-US",
+): Promise<TmdbTrendingResponse> {
+  return tmdbFetch<TmdbTrendingResponse>("/movie/top_rated", {
     page,
     language,
   });

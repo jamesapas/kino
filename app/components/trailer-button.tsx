@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { Icon } from "@iconify/react";
 
 const emptySubscribe = () => () => {};
 function useMounted() {
@@ -90,15 +91,12 @@ export function TrailerButton({
         onClick={() => setOpen(true)}
         className="btn btn-quiet flex items-center gap-2"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
+        <Icon
+          icon="mdi:movie-open-play"
+          width={16}
+          height={16}
           aria-hidden="true"
-        >
-          <path d="M8 5v14l11-7z" />
-        </svg>
+        />
         Trailer
       </button>
 

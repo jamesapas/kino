@@ -38,18 +38,6 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
 
-      # The changes feed is edit-driven, so a film climbing the charts without
-      # being edited never appears in it — and the trending rail orders by
-      # exactly that number. This sweep pulls TMDB's current top ~300 by
-      # popularity, which is what keeps the homepage honest. min-votes=1 so a
-      # surging new release isn't filtered out before it has accumulated votes.
-      - name: Refresh trending from TMDB daily trending
-        run: npm run sync:trending
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-          TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
-
       # The discover sweep pulls TMDB's top ~300 by popularity score, which is
       # a slower-moving metric than the trending endpoint. It keeps the long
       # tail of the catalog fresh and catches films the trending list misses.

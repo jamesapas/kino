@@ -13,6 +13,7 @@ import { MIN_SEARCH_LENGTH } from "@/lib/movies/search-config";
 import type { TasteStats } from "@/lib/profiles/stats";
 import { tasteFingerprint } from "@/lib/profiles/taste-summary";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getTrendingMovies, getTopRatedMovies, discoverMovies } from "@/lib/tmdb";
 
 // Presentation helpers live in images.ts so client components can use them
 // without pulling this module's server-only dependencies. Re-exported here for
@@ -20,20 +21,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export type { MovieCard } from "@/lib/movies/images";
 export { posterUrl, backdropUrl, profileUrl } from "@/lib/movies/images";
 
-/**
- * Browse-side queries and projections.
- *
- * Deliberately separate from the projection the agent's tools use: cards need
- * poster and backdrop paths, and the model has no use for image filenames — it
- * would only pay tokens to read them. Same tables, different shape.
- */
-
-// tagline and vote_count are here for the film page: both are small, and one
-// projection for cards and pages alike means there is only one thing to keep
-// in step with `MovieCard`.
 const CARD_SELECT =
   "id, title, tagline, release_year, genres, runtime, vote_average, vote_count, overview, poster_path, backdrop_path";
-
 
 /** Drop rows that can't render — a poster-less card is just a grey box. */
 function withPoster(rows: MovieCard[]): MovieCard[] {
@@ -50,75 +39,112 @@ function unwrap(
 
 const getCachedTrending = unstable_cache(
   async (limit: number) => {
-    const admin = createAdminClient();
-    return unwrap(
-      await admin
-        .from("movies")
-        .select(CARD_SELECT)
-        .order("trending_rank", { ascending: true, nullsFirst: false })
-        .order("popularity", { ascending: false, nullsFirst: false })
-        .limit(limit),
-      "Trending",
-    );
+    try {
+      const res = await getTrendingMovies(1);
+      return res.results
+        .filter((m) => Boolean(m.poster_path))
+        .slice(0, limit)
+        .map((m) => ({
+          id: m.id,
+          title: m.title,
+          tagline: null,
+          release_year: m.release_date ? parseInt(m.release_date.slice(0, 4), 10) || null : null,
+          genres: [],
+          runtime: null,
+          vote_average: m.vote_average ?? null,
+          vote_count: m.vote_count ?? null,
+          overview: m.overview ?? null,
+          poster_path: m.poster_path,
+          backdrop_path: m.backdrop_path,
+        }));
+    } catch (error) {
+      console.error("Failed to fetch trending movies from TMDB:", error);
+      return [];
+    }
   },
   ["catalog-trending"],
-  { revalidate: 900, tags: ["catalog", "trending"] },
+  { revalidate: 3600, tags: ["catalog", "trending"] },
 );
 
 export async function getTrending(
-  _supabase: SupabaseClient<Database>,
+  _supabase?: SupabaseClient<Database>,
   limit = 20,
 ): Promise<MovieCard[]> {
   return getCachedTrending(limit);
 }
 
 const getCachedTopRated = unstable_cache(
-  async (limit: number, minVotes: number) => {
-    const admin = createAdminClient();
-    return unwrap(
-      await admin
-        .from("movies")
-        .select(CARD_SELECT)
-        .gte("vote_count", minVotes)
-        .order("vote_average", { ascending: false, nullsFirst: false })
-        .limit(limit),
-      "Top rated",
-    );
+  async (limit: number) => {
+    try {
+      const res = await getTopRatedMovies(1);
+      return res.results
+        .filter((m) => Boolean(m.poster_path))
+        .slice(0, limit)
+        .map((m) => ({
+          id: m.id,
+          title: m.title,
+          tagline: null,
+          release_year: m.release_date ? parseInt(m.release_date.slice(0, 4), 10) || null : null,
+          genres: [],
+          runtime: null,
+          vote_average: m.vote_average ?? null,
+          vote_count: m.vote_count ?? null,
+          overview: m.overview ?? null,
+          poster_path: m.poster_path,
+          backdrop_path: m.backdrop_path,
+        }));
+    } catch (error) {
+      console.error("Failed to fetch top rated movies from TMDB:", error);
+      return [];
+    }
   },
   ["catalog-top-rated"],
   { revalidate: 3600, tags: ["catalog", "top-rated"] },
 );
 
 export async function getTopRated(
-  _supabase: SupabaseClient<Database>,
-  { limit = 20, minVotes = 500 }: { limit?: number; minVotes?: number } = {},
+  _supabase?: SupabaseClient<Database>,
+  { limit = 20 }: { limit?: number; minVotes?: number } = {},
 ): Promise<MovieCard[]> {
-  return getCachedTopRated(limit, minVotes);
+  return getCachedTopRated(limit);
 }
 
-const getCachedByGenre = unstable_cache(
-  async (genre: string, limit: number) => {
-    const admin = createAdminClient();
-    return unwrap(
-      await admin
-        .from("movies")
-        .select(CARD_SELECT)
-        .overlaps("genres", [genre])
-        .order("popularity", { ascending: false, nullsFirst: false })
-        .limit(limit),
-      `Genre ${genre}`,
-    );
+
+
+const getCachedByGenreTMDB = unstable_cache(
+  async (genreId: number, limit: number) => {
+    try {
+      const res = await discoverMovies({ withGenres: genreId, page: 1, minVoteCount: 50 });
+      return res.results
+        .filter((m) => Boolean(m.poster_path))
+        .slice(0, limit)
+        .map((m) => ({
+          id: m.id,
+          title: m.title,
+          tagline: null,
+          release_year: m.release_date ? parseInt(m.release_date.slice(0, 4), 10) || null : null,
+          genres: [],
+          runtime: null,
+          vote_average: m.vote_average ?? null,
+          vote_count: m.vote_count ?? null,
+          overview: m.overview ?? null,
+          poster_path: m.poster_path,
+          backdrop_path: m.backdrop_path,
+        }));
+    } catch (error) {
+      console.error(`Failed to fetch movies for genre ${genreId} from TMDB:`, error);
+      return [];
+    }
   },
-  ["catalog-by-genre"],
-  { revalidate: 1800, tags: ["catalog", "by-genre"] },
+  ["catalog-by-genre-tmdb"],
+  { revalidate: 3600, tags: ["catalog", "by-genre-tmdb"] },
 );
 
-export async function getByGenre(
-  _supabase: SupabaseClient<Database>,
-  genre: string,
+export async function getByGenreTMDB(
+  genreId: number,
   limit = 20,
 ): Promise<MovieCard[]> {
-  return getCachedByGenre(genre, limit);
+  return getCachedByGenreTMDB(genreId, limit);
 }
 
 export async function hydrateCards(

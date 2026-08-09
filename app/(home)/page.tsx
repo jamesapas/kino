@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { CarouselRow } from "@/app/components/carousel-row";
+import { CategoryCarouselRow } from "@/app/components/genre-row";
 import { Hero } from "@/app/components/hero";
 import { getViewer } from "@/lib/auth/viewer";
 import {
-  getByGenre,
+  getByGenreTMDB,
   getRatingsByMovie,
   getRatedMovies,
   getTopPicksForYou,
@@ -15,32 +16,6 @@ import {
 import { createServerSupabase } from "@/lib/supabase/server";
 
 import Loading from "./loading";
-
-// ─── helpers ─────────────────────────────────────────────────────────────────
-
-/** The genre shelf follows the user's taste when there is any to follow. */
-function favouriteGenre(
-  ratings: Map<number, number>,
-  genresByMovie: Map<number, string[]>,
-): string | null {
-  const counts = new Map<string, number>();
-  for (const [movieId, rating] of ratings) {
-    if (rating < 7) continue;
-    for (const genre of genresByMovie.get(movieId) ?? []) {
-      counts.set(genre, (counts.get(genre) ?? 0) + 1);
-    }
-  }
-
-  let best: string | null = null;
-  let bestCount = 0;
-  for (const [genre, count] of counts) {
-    if (count > bestCount) {
-      best = genre;
-      bestCount = count;
-    }
-  }
-  return best;
-}
 
 export default async function Home({
   searchParams,
@@ -91,7 +66,7 @@ async function HomeContent() {
       {/* Without a hero the shelves start at the top, so they need clearance
           for the fixed header of their own. */}
       <div
-        className={`page-container flex flex-col gap-2 ${
+        className={`page-container flex flex-col gap-5 sm:gap-6 lg:gap-7 ${
           heroMovies.length > 0 ? "pt-6" : "pt-28"
         }`}
       >
@@ -118,9 +93,9 @@ async function HomeContent() {
           ratings={ratingsById}
         />
 
-        {/* Favourite genre shelf */}
+        {/* Category shelf with dropdown */}
         <Suspense fallback={<ShelfSkeleton />}>
-          <GenreShelf viewerId={viewer?.id ?? null} />
+          <CategoryShelf ratingsById={ratingsById} />
         </Suspense>
       </div>
     </main>
@@ -159,24 +134,22 @@ async function TopPicksShelf({ viewerId }: { viewerId: string | null }) {
 }
 
 /**
- * User's Favourite Genre shelf — rendered at the bottom of the home catalog.
+ * Category shelf — allows switching between TMDB categories via a dropdown.
  */
-async function GenreShelf({ viewerId }: { viewerId: string | null }) {
-  const supabase = await createServerSupabase();
+async function CategoryShelf({
+  ratingsById,
+}: {
+  ratingsById: Record<number, number>;
+}) {
+  const initialActionMovies = await getByGenreTMDB(28, 20);
 
-  if (!viewerId) {
-    const genreRow = await getByGenre(supabase, "Science Fiction", 20);
-    return <CarouselRow title="Science Fiction" movies={genreRow} ratings={{}} />;
-  }
-
-  const ratedMovies = await getRatedMovies(supabase, viewerId);
-  const ratings = new Map(ratedMovies.map((r) => [r.movie.id, r.rating]));
-  const genresByMovie = new Map(ratedMovies.map((r) => [r.movie.id, r.movie.genres]));
-  const genre = favouriteGenre(ratings, genresByMovie) ?? "Science Fiction";
-  const genreRow = await getByGenre(supabase, genre, 20);
-  const ratingsById = Object.fromEntries(ratings);
-
-  return <CarouselRow title={genre} movies={genreRow} ratings={ratingsById} />;
+  return (
+    <CategoryCarouselRow
+      initialGenreId={28}
+      initialMovies={initialActionMovies}
+      ratingsById={ratingsById}
+    />
+  );
 }
 
 // ─── skeletons ───────────────────────────────────────────────────────────────
