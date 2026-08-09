@@ -113,8 +113,6 @@ export type Database = {
           synced_at: string
           tagline: string | null
           title: string
-          trending_at: string | null
-          trending_rank: number | null
           updated_at: string
           vote_average: number | null
           vote_count: number | null
@@ -140,8 +138,6 @@ export type Database = {
           synced_at?: string
           tagline?: string | null
           title: string
-          trending_at?: string | null
-          trending_rank?: number | null
           updated_at?: string
           vote_average?: number | null
           vote_count?: number | null
@@ -167,8 +163,6 @@ export type Database = {
           synced_at?: string
           tagline?: string | null
           title?: string
-          trending_at?: string | null
-          trending_rank?: number | null
           updated_at?: string
           vote_average?: number | null
           vote_count?: number | null
