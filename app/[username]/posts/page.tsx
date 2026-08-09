@@ -42,38 +42,20 @@ export default async function UserPostsPage({ params }: PageProps) {
   const joined = JOINED_FORMAT.format(new Date(profile.created_at));
 
   return (
-    <main className="page-container flex-1 pt-28 pb-24 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-14">
-      <ProfileSidebar
-        displayName={name}
-        username={profile.username}
-        avatarUrl={picture}
-        initials={initials}
-        bio={profile.bio}
-        followers={counts.followers}
-        following={counts.following}
-        isOwner={isOwner}
-        profileId={profile.id}
-        viewerFollows={viewerFollows}
-        joinedDate={joined}
-        statsCount={stats.count}
-        statsAverage={stats.averageStars ? `${stats.averageStars.toFixed(1)}★` : "—"}
-      />
+    <div>
+      <h1 className="border-b border-ink-line pb-4 text-xl font-bold text-bone">
+        {isOwner ? "Your posts" : `Posts by ${name}`}
+      </h1>
 
-      <div className="mt-10 lg:mt-0">
-        <h1 className="border-b border-ink-line pb-4 text-xl font-bold text-bone">
-          {isOwner ? "Your posts" : `Posts by ${name}`}
-        </h1>
-
-        <Suspense fallback={<PostsListSkeleton />}>
-          <UserPostsStream
-            profileId={profile.id}
-            viewerId={viewer?.id ?? null}
-            isOwner={isOwner}
-            name={name}
-          />
-        </Suspense>
-      </div>
-    </main>
+      <Suspense fallback={<PostsListSkeleton />}>
+        <UserPostsStream
+          profileId={profile.id}
+          viewerId={viewer?.id ?? null}
+          isOwner={isOwner}
+          name={name}
+        />
+      </Suspense>
+    </div>
   );
 }
 

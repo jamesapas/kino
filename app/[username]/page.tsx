@@ -84,60 +84,43 @@ export default async function UsernamePage({ params }: PageProps) {
   );
 
   return (
-    <main className="page-container flex-1 pt-28 pb-24 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-14">
-      <ProfileSidebar
-        displayName={name}
-        username={profile.username}
-        avatarUrl={picture}
-        initials={initials}
-        bio={profile.bio}
-        followers={counts.followers}
-        following={counts.following}
-        isOwner={isOwner}
-        profileId={profile.id}
-        viewerFollows={viewerFollows}
-        joinedDate={joined}
-        statsCount={stats.count}
-        statsAverage={stats.averageStars ? `${stats.averageStars.toFixed(1)}★` : "—"}
-      />
-
-      <div className="mt-10 flex flex-col gap-12 lg:mt-0">
-        {stats.count > 0 && (
-          <div className="grid gap-10 lg:grid-cols-2">
-            <RatingSpread
-              distribution={stats.distribution}
-              total={stats.count}
-              averageStars={stats.averageStars}
-              isOwner={isOwner}
-            />
-            <KinoTake
-              name={name}
-              isOwner={isOwner}
-              summary={profile.taste_summary}
-              stale={stale}
-              ratedCount={stats.count}
-              minRated={MIN_RATED_FOR_SUMMARY}
-            />
-          </div>
-        )}
-
-        {/* Posts stream independently: `getUserEntries` is the slowest
-              section (multi-step fetch + hydration). Everything above this
-              line is already visible while the posts boundary is resolving. */}
-        <Suspense fallback={<PostsSkeleton />}>
-          <ProfilePosts
-            profileId={profile.id}
-            viewerId={viewer?.id ?? null}
+    <div className="flex flex-col gap-12">
+      {stats.count > 0 && (
+        <div className="grid gap-10 lg:grid-cols-2">
+          <RatingSpread
+            distribution={stats.distribution}
+            total={stats.count}
+            averageStars={stats.averageStars}
             isOwner={isOwner}
-            name={name}
-            username={profile.username}
           />
-        </Suspense>
+          <KinoTake
+            name={name}
+            isOwner={isOwner}
+            summary={profile.taste_summary}
+            stale={stale}
+            ratedCount={stats.count}
+            minRated={MIN_RATED_FOR_SUMMARY}
+          />
+        </div>
+      )}
 
-        {stats.count === 0 ? (
-          <EmptyState isOwner={isOwner} />
-        ) : (
-          <>
+      {/* Posts stream independently: `getUserEntries` is the slowest
+            section (multi-step fetch + hydration). Everything above this
+            line is already visible while the posts boundary is resolving. */}
+      <Suspense fallback={<PostsSkeleton />}>
+        <ProfilePosts
+          profileId={profile.id}
+          viewerId={viewer?.id ?? null}
+          isOwner={isOwner}
+          name={name}
+          username={profile.username}
+        />
+      </Suspense>
+
+      {stats.count === 0 ? (
+        <EmptyState isOwner={isOwner} />
+      ) : (
+        <>
             <RatedFilmsGrid
               userId={profile.id}
               heading={isOwner ? "Films you’ve rated" : "Films rated"}
@@ -168,7 +151,6 @@ export default async function UsernamePage({ params }: PageProps) {
           </>
         )}
       </div>
-    </main>
   );
 }
 
