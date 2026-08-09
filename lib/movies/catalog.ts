@@ -477,7 +477,14 @@ export async function getRatingStats(
   };
 }
 
-export type RatedMoviesSort = "rating-desc" | "rating-asc" | "year-desc" | "year-asc" | "title-asc";
+export type RatedMoviesSort =
+  | "rating-desc"
+  | "rating-asc"
+  | "date-desc"
+  | "date-asc"
+  | "year-desc"
+  | "year-asc"
+  | "title-asc";
 
 export type RatedMoviesPagedResult = {
   movies: RatedMovie[];
@@ -505,7 +512,7 @@ export async function getRatedMoviesPaged(
 ): Promise<RatedMoviesPagedResult> {
   let query = supabase
     .from("user_movie_ratings")
-    .select(`rating, notes, created_at, movies!inner(${CARD_SELECT})`, { count: "exact" })
+    .select(`rating, notes, created_at, movies!inner(${CARD_SELECT})`)
     .eq("user_id", userId)
     .not("rating", "is", null);
 
@@ -513,27 +520,7 @@ export async function getRatedMoviesPaged(
     query = query.overlaps("movies.genres", [genre]);
   }
 
-  switch (sort) {
-    case "rating-desc":
-      query = query.order("rating", { ascending: false }).order("created_at", { ascending: false });
-      break;
-    case "rating-asc":
-      query = query.order("rating", { ascending: true }).order("created_at", { ascending: true });
-      break;
-    case "year-desc":
-      query = query.order("release_year", { referencedTable: "movies", ascending: false, nullsFirst: false });
-      break;
-    case "year-asc":
-      query = query.order("release_year", { referencedTable: "movies", ascending: true, nullsFirst: false });
-      break;
-    case "title-asc":
-      query = query.order("title", { referencedTable: "movies", ascending: true });
-      break;
-  }
-
-  query = query.range(offset, offset + limit - 1);
-
-  const { data, error, count } = await query;
+  const { data, error } = await query;
   if (error) throw new Error(`Failed to read rated films: ${error.message}`);
 
   const rated: RatedMovie[] = [];
@@ -547,11 +534,57 @@ export async function getRatedMoviesPaged(
     });
   }
 
-  const total = count ?? rated.length;
-  const hasMore = offset + rated.length < total;
+  // Sort deterministically in memory to handle joined movie attributes (releaseYear, title)
+  // as well as rating and date accurately.
+  rated.sort((a, b) => {
+    switch (sort) {
+      case "rating-desc": {
+        const diff = b.rating - a.rating;
+        if (diff !== 0) return diff;
+        return new Date(b.ratedAt).getTime() - new Date(a.ratedAt).getTime();
+      }
+      case "rating-asc": {
+        const diff = a.rating - b.rating;
+        if (diff !== 0) return diff;
+        return new Date(b.ratedAt).getTime() - new Date(a.ratedAt).getTime();
+      }
+      case "date-desc": {
+        return new Date(b.ratedAt).getTime() - new Date(a.ratedAt).getTime();
+      }
+      case "date-asc": {
+        return new Date(a.ratedAt).getTime() - new Date(b.ratedAt).getTime();
+      }
+      case "year-desc": {
+        const yearA = a.movie.release_year ?? 0;
+        const yearB = b.movie.release_year ?? 0;
+        const diff = yearB - yearA;
+        if (diff !== 0) return diff;
+        return a.movie.title.localeCompare(b.movie.title);
+      }
+      case "year-asc": {
+        const yearA = a.movie.release_year ?? 9999;
+        const yearB = b.movie.release_year ?? 9999;
+        const diff = yearA - yearB;
+        if (diff !== 0) return diff;
+        return a.movie.title.localeCompare(b.movie.title);
+      }
+      case "title-asc": {
+        return a.movie.title.localeCompare(b.movie.title, undefined, {
+          sensitivity: "base",
+          numeric: true,
+        });
+      }
+      default:
+        return 0;
+    }
+  });
+
+  const total = rated.length;
+  const pagedMovies = rated.slice(offset, offset + limit);
+  const hasMore = offset + pagedMovies.length < total;
 
   return {
-    movies: rated,
+    movies: pagedMovies,
     total,
     hasMore,
   };

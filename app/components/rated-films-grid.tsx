@@ -12,6 +12,8 @@ type Sort = RatedMoviesSort;
 const SORTS: { value: Sort; label: string }[] = [
   { value: "rating-desc", label: "Highest rated" },
   { value: "rating-asc", label: "Lowest rated" },
+  { value: "date-desc", label: "Recently rated" },
+  { value: "date-asc", label: "Earliest rated" },
   { value: "year-desc", label: "Newest release" },
   { value: "year-asc", label: "Oldest release" },
   { value: "title-asc", label: "Title A–Z" },
@@ -152,13 +154,13 @@ export function RatedFilmsGrid({
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <h2 className="text-xl font-bold text-bone">{heading}</h2>
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 cursor-pointer">
           <span className="meta">Sort</span>
           <div className="relative">
             <select
               value={sort}
               onChange={(event) => handleSortChange(event.target.value as Sort)}
-              className="appearance-none rounded-full border border-ink-line bg-transparent py-1.5 pr-8 pl-3 text-sm font-semibold text-bone transition-colors hover:border-bone/40 focus-visible:border-lamp"
+              className="cursor-pointer appearance-none rounded-full border border-ink-line bg-transparent py-1.5 pr-8 pl-3 text-sm font-semibold text-bone transition-colors hover:border-bone/40 focus-visible:border-lamp"
             >
               {SORTS.map((option) => (
                 <option key={option.value} value={option.value} className="bg-ink text-bone">
@@ -248,7 +250,7 @@ function GenreChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+      className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
         active
           ? "border-lamp bg-lamp/15 text-lamp"
           : "border-ink-line text-bone-soft hover:border-bone/40 hover:text-bone"
