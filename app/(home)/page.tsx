@@ -13,6 +13,7 @@ import {
   getTopRated,
   getTrending,
 } from "@/lib/movies/catalog";
+import { getListMovies } from "@/lib/movies/lists";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 import Loading from "./loading";
@@ -86,9 +87,16 @@ async function HomeContent() {
           priority
         />
 
+        {/* Watchlist shelf for signed-in users (hidden for now)
+        {viewer?.id && (
+          <Suspense fallback={<ShelfSkeleton />}>
+            <WatchlistShelf ratingsById={ratingsById} />
+          </Suspense>
+        )}
+        */}
+
         <CarouselRow
           title="Top rated"
-          note="500+ votes"
           movies={topRated}
           ratings={ratingsById}
         />
@@ -103,6 +111,28 @@ async function HomeContent() {
 }
 
 // ─── streaming components ─────────────────────────────────────────────────────
+
+/**
+ * "Your Watchlist" shelf — rendered for signed-in users when they have saved films.
+ */
+async function WatchlistShelf({
+  ratingsById,
+}: {
+  ratingsById: Record<number, number>;
+}) {
+  const supabase = await createServerSupabase();
+  const watchlistMovies = await getListMovies(supabase, "watchlist");
+
+  if (watchlistMovies.length === 0) return null;
+
+  return (
+    <CarouselRow
+      title="Your Watchlist"
+      movies={watchlistMovies}
+      ratings={ratingsById}
+    />
+  );
+}
 
 /**
  * "Top Picks for You" shelf — rendered as the top shelf right below the Hero.
@@ -125,7 +155,6 @@ async function TopPicksShelf({ viewerId }: { viewerId: string | null }) {
   return (
     <CarouselRow
       title="Top Picks for You"
-      note={topPicks.tasteSummary ?? undefined}
       movies={topPicks.movies}
       ratings={ratingsById}
       priority
