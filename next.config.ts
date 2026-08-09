@@ -12,6 +12,7 @@ const supabaseHost = new URL(
 
 const nextConfig: NextConfig = {
   images: {
+    qualities: [75, 90, 95],
     // Without these, next/image refuses the host outright.
     remotePatterns: [
       {
