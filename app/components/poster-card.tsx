@@ -61,7 +61,7 @@ export function PosterCard({
   // w500 rather than w342: the card is up to 224px wide, which a 342px source
   // can't cover on a 2x display. Still w500 on phones — the card is smaller
   // there, but the pixel ratio is higher.
-  const src = posterUrl(movie.poster_path, "w500");
+  const src = posterUrl(movie.poster_path, "w780");
   if (!src) return null;
 
   const score = movie.vote_average ? movie.vote_average.toFixed(1) : null;
@@ -74,6 +74,7 @@ export function PosterCard({
           src={src}
           alt={`${movie.title} poster`}
           fill
+          quality={90}
           sizes={sizes}
           preload={preload}
           className="object-cover group-hover:scale-105 transition-all duration-300"

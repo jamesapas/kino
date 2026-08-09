@@ -150,7 +150,7 @@ export function Hero({
       className="relative isolate min-h-[62vh] w-full touch-pan-y overflow-hidden select-none sm:min-h-[70vh]"
     >
       {movies.map((slide, slideIndex) => {
-        const backdrop = backdropUrl(slide.backdrop_path);
+        const backdrop = backdropUrl(slide.backdrop_path, "original");
         if (!backdrop) return null;
 
         return (
@@ -159,10 +159,12 @@ export function Hero({
             src={backdrop}
             alt=""
             fill
+            quality={95}
             priority={slideIndex === 0}
             sizes="100vw"
-            className={`object-cover object-top transition-opacity duration-700 ease-out ${slideIndex === index ? "opacity-100" : "opacity-0"
-              }`}
+            className={`object-cover object-top transition-opacity duration-700 ease-out ${
+              slideIndex === index ? "opacity-100" : "opacity-0"
+            }`}
           />
         );
       })}

@@ -23,11 +23,17 @@ export type MovieCard = {
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
-export function posterUrl(path: string | null, size: "w342" | "w500" = "w500") {
+export function posterUrl(
+  path: string | null,
+  size: "w342" | "w500" | "w780" | "original" = "w780",
+) {
   return path ? `${TMDB_IMAGE_BASE}/${size}${path}` : null;
 }
 
-export function backdropUrl(path: string | null, size: "w1280" | "original" = "w1280") {
+export function backdropUrl(
+  path: string | null,
+  size: "w1280" | "original" = "original",
+) {
   return path ? `${TMDB_IMAGE_BASE}/${size}${path}` : null;
 }
 
