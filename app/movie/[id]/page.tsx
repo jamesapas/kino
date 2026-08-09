@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cache, Suspense } from "react";
 
 import { CastRow } from "@/app/components/cast-row";
-import { CarouselRow } from "@/app/components/carousel-row";
+import { PosterCard } from "@/app/components/poster-card";
 import { AskAboutButton } from "@/app/components/chat-overlay";
 import { ListButtons } from "@/app/components/movie-lists";
 import { MovieMeta } from "@/app/components/movie-meta";
@@ -145,11 +145,16 @@ async function MovieContent({ id }: { id: number }) {
 
       {related.length > 0 && (
         <div className="page-container pt-14 sm:pt-16">
-          <CarouselRow
-            title="More like this"
-            movies={related}
-            ratings={ratingsById}
-          />
+          <h2 className="mb-4 text-lg font-bold text-bone sm:text-xl">More like this</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4 [&>article]:w-full">
+            {related.slice(0, 18).map((relatedMovie) => (
+              <PosterCard
+                key={relatedMovie.id}
+                movie={relatedMovie}
+                rating={ratingsById[relatedMovie.id] ?? null}
+              />
+            ))}
+          </div>
         </div>
       )}
     </main>

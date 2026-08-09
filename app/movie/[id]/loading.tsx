@@ -86,16 +86,13 @@ export default function Loading() {
 
       {/* "More like this" shelf skeleton */}
       <div className="page-container pt-14 sm:pt-16">
-        <section className="group/row">
-          <div className="mb-3 flex items-baseline gap-3">
+        <section>
+          <div className="mb-4">
             <div className="skeleton h-6 w-36 rounded" />
           </div>
-          <div className="flex gap-3 overflow-hidden pt-1 pb-4 sm:gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="w-[8rem] shrink-0 sm:w-[12.5rem] lg:w-[14rem]"
-              >
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4">
+            {[...Array(18)].map((_, i) => (
+              <div key={i} className="w-full">
                 <div className="skeleton aspect-[2/3] w-full rounded-lg" />
                 <div className="mt-2 space-y-1 sm:mt-2.5">
                   <div className="skeleton h-3.5 w-3/4 rounded sm:h-4" />
