@@ -145,7 +145,7 @@ async function MovieContent({ id }: { id: number }) {
 
       {related.length > 0 && (
         <div className="page-container pt-14 sm:pt-16">
-          <h2 className="mb-4 text-lg font-bold text-bone sm:text-xl">More like this</h2>
+          <h2 className="mb-4 text-lg font-bold text-bone sm:text-xl">You Might Also Like</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-4 [&>article]:w-full">
             {related.slice(0, 18).map((relatedMovie) => (
               <PosterCard
