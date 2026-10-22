@@ -1,31 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { KinoLogo } from "@/app/components/kino-logo";
-
 export const metadata: Metadata = {
   title: "Not found",
   description: "That page isn't in the catalog.",
 };
 
 /**
- * The 404.
+ * The 404 page.
  *
- * Deliberately not wrapped in AppShell: the shell reads the viewer, which means
- * cookies, which would make the one page every stray URL hits do a round trip
- * to Supabase before it can say "no". It stands on its own instead, with the
- * wordmark as the way back — the same lockup the header uses, so the page is
- * recognisably this site even without the bar.
- *
- * The backdrop is the sign-in room's: the two places you can end up without a
- * catalog behind you are the ones lit by the projector alone.
+ * Renders inside RootLayout's AppShell, which already includes SiteHeader.
  */
 export default function NotFound() {
   return (
-    <main className="cinema-backdrop film-grain relative flex flex-1 flex-col">
+    <main className="cinema-backdrop film-grain relative flex flex-1 flex-col pt-16">
       <div className="page-container flex flex-1 flex-col">
-        <KinoLogo className="mt-6 w-fit" />
-
         <div className="flex flex-1 flex-col items-center justify-center gap-8 pb-24 text-center">
           <Filmstrip />
 
