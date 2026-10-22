@@ -155,7 +155,7 @@ export function SinglePostView({
           {/* Author Header */}
           <header className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0">
-              <Link href={`/${post.author.username}`} className="shrink-0">
+              <Link href={`/${post.author.username}`} prefetch={false} className="shrink-0">
                 <Avatar
                   url={avatarUrl(post.author.avatar_path)}
                   initials={initialsFor(post.author.display_name, post.author.username)}
@@ -166,12 +166,14 @@ export function SinglePostView({
                 <div className="flex items-center gap-x-1.5 sm:gap-x-2 flex-wrap min-w-0">
                   <Link
                     href={`/${post.author.username}`}
+                    prefetch={false}
                     className="truncate font-bold text-bone text-base sm:text-lg hover:underline"
                   >
                     {displayNameFor(post.author.display_name, post.author.username)}
                   </Link>
                   <Link
                     href={`/${post.author.username}`}
+                    prefetch={false}
                     className="meta truncate !text-xs sm:!text-sm text-bone-dim hover:underline"
                   >
                     @{post.author.username}

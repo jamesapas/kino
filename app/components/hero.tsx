@@ -18,7 +18,7 @@ import { backdropUrl, type MovieCard } from "@/lib/movies/images";
  */
 function MoreInfoLink({ movieId }: { movieId: number }) {
   return (
-    <Link href={`/movie/${movieId}`} className="btn btn-quiet">
+    <Link href={`/movie/${movieId}`} prefetch={false} className="btn btn-quiet">
       <svg
         width="16"
         height="16"
@@ -150,7 +150,7 @@ export function Hero({
       className="relative isolate min-h-[62vh] w-full touch-pan-y overflow-hidden select-none sm:min-h-[70vh]"
     >
       {movies.map((slide, slideIndex) => {
-        const backdrop = backdropUrl(slide.backdrop_path, "original");
+        const backdrop = backdropUrl(slide.backdrop_path, "w1280");
         if (!backdrop) return null;
 
         return (
@@ -159,7 +159,6 @@ export function Hero({
             src={backdrop}
             alt=""
             fill
-            quality={95}
             priority={slideIndex === 0}
             sizes="100vw"
             className={`object-cover object-top transition-opacity duration-700 ease-out ${

@@ -23,6 +23,7 @@ export function PostMovies({ movies }: { movies: MovieCard[] }) {
               <Poster movie={movie} sizes="7rem" />
               <Link
                 href={`/movie/${movie.id}`}
+                prefetch={false}
                 className="absolute inset-0 z-10 rounded-lg"
               >
                 <span className="sr-only">View details for {movie.title}</span>
@@ -32,7 +33,7 @@ export function PostMovies({ movies }: { movies: MovieCard[] }) {
               </div>
             </div>
 
-            <Link href={`/movie/${movie.id}`} className="block">
+            <Link href={`/movie/${movie.id}`} prefetch={false} className="block">
               <p className="mt-1.5 line-clamp-2 text-xs font-semibold leading-snug text-bone group-hover:text-bone/80 transition-colors">
                 {movie.title}
               </p>

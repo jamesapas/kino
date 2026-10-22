@@ -81,7 +81,7 @@ export function PeopleSearch() {
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
-    }, 200);
+    }, 300);
 
     return () => {
       clearTimeout(id);
@@ -172,6 +172,7 @@ function PersonRow({
   return (
     <Link
       href={`/${person.username}`}
+      prefetch={false}
       onClick={onNavigate}
       className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-bone/10"
     >

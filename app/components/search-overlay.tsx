@@ -153,7 +153,7 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
-    }, 200);
+    }, 300);
 
     return () => {
       clearTimeout(id);
@@ -314,6 +314,7 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
                     <li key={movie.id}>
                       <Link
                         href={`/movie/${movie.id}`}
+                        prefetch={false}
                         onClick={onClose}
                         onMouseEnter={() => setActive(index)}
                         className={`flex w-full items-center gap-3.5 px-3 py-2.5 text-left transition-colors ${
@@ -363,7 +364,7 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
 }
 
 function Poster({ movie }: { movie: MovieCard }) {
-  const src = posterUrl(movie.poster_path, "w342");
+  const src = posterUrl(movie.poster_path, "w185");
 
   return (
     // 48×72 is the poster's native 2:3, which the old 40×56 was not.

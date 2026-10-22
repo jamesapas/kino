@@ -31,14 +31,28 @@ export async function GET(request: Request) {
   const offset = offsetParam(params);
 
   if (query.length < MIN_SEARCH_LENGTH) {
-    return Response.json({ people: [], hasMore: false });
+    return Response.json(
+      { people: [], hasMore: false },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        },
+      },
+    );
   }
 
   const supabase = await createServerSupabase();
 
   try {
     const { people, hasMore } = await searchProfiles(supabase, query, PAGE_SIZE, offset);
-    return Response.json({ people, hasMore: hasMore && offset < MAX_OFFSET });
+    return Response.json(
+      { people, hasMore: hasMore && offset < MAX_OFFSET },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=60, s-maxage=120, stale-while-revalidate=300",
+        },
+      },
+    );
   } catch (error) {
     console.error("[api/people]", error);
     return Response.json({ error: "Search failed. Try again." }, { status: 500 });

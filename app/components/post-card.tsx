@@ -168,6 +168,7 @@ export function PostCard({
       <div className="flex gap-3 sm:gap-4">
         <Link
           href={`/${post.author.username}`}
+          prefetch={false}
           onClick={(e) => e.stopPropagation()}
           className="shrink-0"
         >
@@ -185,6 +186,7 @@ export function PostCard({
               <div className="flex items-center gap-x-1.5 sm:gap-x-2 flex-wrap min-w-0">
                 <Link
                   href={`/${post.author.username}`}
+                  prefetch={false}
                   onClick={(e) => e.stopPropagation()}
                   className="truncate text-xs sm:text-sm font-semibold text-bone hover:underline"
                 >
@@ -192,6 +194,7 @@ export function PostCard({
                 </Link>
                 <Link
                   href={`/${post.author.username}`}
+                  prefetch={false}
                   onClick={(e) => e.stopPropagation()}
                   className="meta truncate !text-[0.6875rem] sm:!text-xs text-bone-dim hover:underline"
                 >
@@ -217,7 +220,7 @@ export function PostCard({
               </div>
 
               <div className="flex items-center gap-1.5 pt-0.5 meta !text-[0.6875rem] sm:!text-xs text-bone-dim">
-                <Link href={`/post/${post.id}`} className="hover:text-bone transition-colors">
+                <Link href={`/post/${post.id}`} prefetch={false} className="hover:text-bone transition-colors">
                   <TimeAgo iso={post.createdAt} />
                 </Link>
                 <span aria-hidden className="text-bone-soft text-xs font-bold px-0.5">
@@ -374,7 +377,7 @@ function RepostLine({ by, viewerId }: { by: PostAuthor; viewerId: string | null 
         "You reposted"
       ) : (
         <>
-          <Link href={`/${by.username}`} className="hover:text-lamp font-medium">
+          <Link href={`/${by.username}`} prefetch={false} className="hover:text-lamp font-medium">
             {displayNameFor(by.display_name, by.username)}
           </Link>
           <span>reposted</span>
@@ -1141,7 +1144,7 @@ export function CommentRow({
 
   return (
     <li className={`group/comment flex gap-2.5 animate-comment-fade ${isMenuOpen ? "relative z-50" : "relative z-0"}`}>
-      <Link href={`/${comment.author.username}`} className="shrink-0 pt-0.5">
+      <Link href={`/${comment.author.username}`} prefetch={false} className="shrink-0 pt-0.5">
         <Avatar
           url={avatarUrl(comment.author.avatar_path)}
           initials={initialsFor(comment.author.display_name, comment.author.username)}
@@ -1154,12 +1157,14 @@ export function CommentRow({
         <div className="flex items-center gap-x-1.5 flex-wrap">
           <Link
             href={`/${comment.author.username}`}
+            prefetch={false}
             className="truncate text-sm font-semibold text-bone hover:underline"
           >
             {displayNameFor(comment.author.display_name, comment.author.username)}
           </Link>
           <Link
             href={`/${comment.author.username}`}
+            prefetch={false}
             className="meta truncate !text-xs text-bone-dim hover:underline"
           >
             @{comment.author.username}

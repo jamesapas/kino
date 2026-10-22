@@ -25,14 +25,14 @@ const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
 export function posterUrl(
   path: string | null,
-  size: "w342" | "w500" | "w780" | "original" = "w780",
+  size: "w92" | "w154" | "w185" | "w342" | "w500" | "w780" | "original" = "w500",
 ) {
   return path ? `${TMDB_IMAGE_BASE}/${size}${path}` : null;
 }
 
 export function backdropUrl(
   path: string | null,
-  size: "w1280" | "original" = "original",
+  size: "w780" | "w1280" | "original" = "w1280",
 ) {
   return path ? `${TMDB_IMAGE_BASE}/${size}${path}` : null;
 }

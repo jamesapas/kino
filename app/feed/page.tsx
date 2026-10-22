@@ -122,6 +122,7 @@ function SuggestionRow({
       <div className="group/row flex items-center justify-between gap-3 p-2 -m-2 rounded-xl transition-colors hover:bg-bone/5">
         <Link
           href={`/${person.username}`}
+          prefetch={false}
           className="flex items-center gap-3 min-w-0 flex-1"
         >
           <Avatar

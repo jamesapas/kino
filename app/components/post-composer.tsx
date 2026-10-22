@@ -302,7 +302,7 @@ function PostModal({
 
 /** An attached film, as a chip you can take back off. */
 export function AttachedFilm({ film, onRemove }: { film: MovieCard; onRemove: () => void }) {
-  const src = posterUrl(film.poster_path, "w342");
+  const src = posterUrl(film.poster_path, "w92");
 
   return (
     <span className="flex items-center gap-2 rounded-full border border-ink-line bg-bone/8 py-1 pr-1 pl-2">
@@ -496,7 +496,7 @@ export function FilmPicker({
 }
 
 function PickerPoster({ movie }: { movie: MovieCard }) {
-  const src = posterUrl(movie.poster_path, "w342");
+  const src = posterUrl(movie.poster_path, "w185");
 
   return (
     <span className="relative block h-12 w-8 shrink-0 overflow-hidden rounded-xs bg-ink-raised ring-1 ring-ink-line">

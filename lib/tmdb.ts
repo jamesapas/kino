@@ -78,6 +78,7 @@ async function tmdbFetch<T>(path: string, params: QueryParams = {}): Promise<T> 
           Authorization: `Bearer ${serverEnv.tmdbAccessToken}`,
           Accept: "application/json",
         },
+        next: { revalidate: 3600 },
       });
     } catch (error) {
       // Network-level failure: retry with backoff.

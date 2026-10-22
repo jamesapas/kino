@@ -12,8 +12,10 @@ const supabaseHost = new URL(
 
 const nextConfig: NextConfig = {
   images: {
-    qualities: [75, 90, 95],
-    // Without these, next/image refuses the host outright.
+    // Serve images directly from TMDB/Supabase CDN without Vercel transformation proxy.
+    // TMDB already provides pre-scaled CDN assets (w342, w500, w1280), eliminating
+    // Vercel image transformation limits (5k), cache writes (100k), and Sharp CPU usage.
+    unoptimized: true,
     remotePatterns: [
       {
         // Posters and backdrops come from TMDB's CDN.

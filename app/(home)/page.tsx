@@ -8,7 +8,6 @@ import { getViewer } from "@/lib/auth/viewer";
 import {
   getByGenreTMDB,
   getRatingsByMovie,
-  getRatedMovies,
   getTopPicksForYou,
   getTopRated,
   getTrending,
@@ -75,7 +74,7 @@ async function HomeContent() {
             reads show immediately; fresh lookups stream seamlessly. */}
         {viewer?.id && (
           <Suspense fallback={<ShelfSkeleton />}>
-            <TopPicksShelf viewerId={viewer.id} />
+            <TopPicksShelf viewerId={viewer.id} ratingsById={ratingsById} />
           </Suspense>
         )}
 
@@ -138,19 +137,19 @@ async function WatchlistShelf({
  * "Top Picks for You" shelf — rendered as the top shelf right below the Hero.
  * Cached per user with `unstable_cache` (revalidate: 900) for instant renders.
  */
-async function TopPicksShelf({ viewerId }: { viewerId: string | null }) {
+async function TopPicksShelf({
+  viewerId,
+  ratingsById,
+}: {
+  viewerId: string | null;
+  ratingsById: Record<number, number>;
+}) {
   if (!viewerId) return null;
 
   const supabase = await createServerSupabase();
-  const [ratedMovies, topPicks] = await Promise.all([
-    getRatedMovies(supabase, viewerId),
-    getTopPicksForYou(supabase, viewerId, 20),
-  ]);
+  const topPicks = await getTopPicksForYou(supabase, viewerId, 20);
 
   if (!topPicks || topPicks.movies.length === 0) return null;
-
-  const ratings = new Map(ratedMovies.map((r) => [r.movie.id, r.rating]));
-  const ratingsById = Object.fromEntries(ratings);
 
   return (
     <CarouselRow

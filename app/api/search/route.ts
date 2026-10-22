@@ -37,7 +37,14 @@ export async function GET(request: Request) {
   const offset = offsetParam(params);
 
   if (query.length < MIN_SEARCH_LENGTH) {
-    return Response.json({ movies: [], hasMore: false });
+    return Response.json(
+      { movies: [], hasMore: false },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        },
+      },
+    );
   }
 
   const supabase = await createServerSupabase();
@@ -45,7 +52,14 @@ export async function GET(request: Request) {
   try {
     const { movies, hasMore } = await searchMoviesByTitle(supabase, query, PAGE_SIZE, offset);
     // The cap is the end of the road, so stop inviting the next page at it.
-    return Response.json({ movies, hasMore: hasMore && offset < MAX_OFFSET });
+    return Response.json(
+      { movies, hasMore: hasMore && offset < MAX_OFFSET },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=120, s-maxage=300, stale-while-revalidate=600",
+        },
+      },
+    );
   } catch (error) {
     console.error("[api/search]", error);
     return Response.json({ error: "Search failed. Try again." }, { status: 500 });

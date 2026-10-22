@@ -15,6 +15,24 @@ import { NextResponse, type NextRequest } from "next/server";
  * because proxy code is meant to run independently of the render path.
  */
 export async function proxy(request: NextRequest) {
+  // Fast-path: Skip session refresh on router prefetch requests to save edge execution
+  if (
+    request.headers.get("next-router-prefetch") === "1" ||
+    request.headers.get("purpose") === "prefetch"
+  ) {
+    return NextResponse.next({ request });
+  }
+
+  // Fast-path: If no Supabase auth token cookie exists, the visitor is anonymous.
+  // Skipping getUser() avoids unnecessary network round-trips and edge CPU.
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+
+  if (!hasAuthCookie) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -48,5 +66,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Without a matcher this runs on static assets too, which would block CSS/JS.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
