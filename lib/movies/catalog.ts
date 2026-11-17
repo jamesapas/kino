@@ -13,7 +13,14 @@ import { MIN_SEARCH_LENGTH } from "@/lib/movies/search-config";
 import type { TasteStats } from "@/lib/profiles/stats";
 import { tasteFingerprint } from "@/lib/profiles/taste-summary";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getTrendingMovies, getTopRatedMovies, discoverMovies } from "@/lib/tmdb";
+import { mapDetailsToRow } from "@/lib/movies/sync";
+import {
+  TmdbError,
+  discoverMovies,
+  getMovieDetails,
+  getTopRatedMovies,
+  getTrendingMovies,
+} from "@/lib/tmdb";
 
 // Presentation helpers live in images.ts so client components can use them
 // without pulling this module's server-only dependencies. Re-exported here for
@@ -159,7 +166,35 @@ export async function hydrateCards(
   return new Map((data ?? []).map((row) => [row.id, row]));
 }
 
-/** One film, for its own page. Null when the id isn't in the catalog. */
+/**
+ * The home shelves come straight from TMDB, so they can link to films the
+ * nightly sync hasn't caught yet. Pull those in on first visit rather than
+ * 404ing; the row lands with `embedded_at` null so the embed job picks it up.
+ */
+async function importMovieFromTmdb(
+  admin: SupabaseClient<Database>,
+  id: number,
+): Promise<MovieCard | null> {
+  let details;
+  try {
+    details = await getMovieDetails(id);
+  } catch (error) {
+    if (error instanceof TmdbError && error.isNotFound) return null;
+    throw error;
+  }
+
+  // Selected off the upsert itself: a fresh GET would be identical to the miss
+  // above and come back from Next's fetch cache as the same empty result.
+  const { data, error } = await admin
+    .from("movies")
+    .upsert(mapDetailsToRow(details), { onConflict: "id" })
+    .select(CARD_SELECT)
+    .single();
+  if (error) throw new Error(`Movie ${id} import failed: ${error.message}`);
+  return data;
+}
+
+/** One film, for its own page. Null when neither the catalog nor TMDB has it. */
 const getCachedMovieById = unstable_cache(
   async (id: number) => {
     const admin = createAdminClient();
@@ -170,9 +205,9 @@ const getCachedMovieById = unstable_cache(
       .maybeSingle();
 
     if (error) throw new Error(`Movie ${id} lookup failed: ${error.message}`);
-    return data;
+    return data ?? importMovieFromTmdb(admin, id);
   },
-  ["catalog-movie-by-id"],
+  ["catalog-movie-by-id-v3"],
   { revalidate: 3600, tags: ["catalog", "movie-by-id"] },
 );
 
